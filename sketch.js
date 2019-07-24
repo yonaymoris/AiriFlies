@@ -1,9 +1,13 @@
+const mySoundModelURl = 'https://storage.googleapis.com/tm-speech-commands/airilove/model.json';
+let mySoundModel;
+
 var bgImg;
-var lostImg;
+var groundImg;
 var lostLabel;
 var airi;
 var y1 = 0;
 var y2;
+var z;
 var myCanvas;
 var scoreLabel;
 var scoresLabel;
@@ -23,11 +27,14 @@ var lost = false;
 var results = [];
 
 function preload(){
+  mySoundModel = ml5.soundClassifier(mySoundModelURl);
   bgImg = loadImage("assets/bgr.png");
-  lostImg = loadImage("assets/lost.png");
+  groundImg = loadImage("assets/ground.png");
 }
 
 function setup() { 
+  mySoundModel.classify(gotResults);
+
   lostLabel = createDiv('YOU LOST');
   lostLabel.addClass('lost');
 
@@ -57,18 +64,45 @@ function setup() {
   airi_fly.offX = 340;
 
   y2 = height;
+  z = height;
 } 
+
+function gotResults(err, results) {
+  if (err) console.log(err);
+  if (results) {
+    console.log(results);
+    if (results[0].label === "Pew") {
+      mouseClicked();
+    }
+
+    if (results[0].label === "Play" && (newGame || lost)) {
+      newGame = false;
+      lost = false;
+      score = 0;
+      y1 = 0;
+      y2 = height;
+      z = height;
+      mouseClicked();
+    }
+  }
+}
 
 function draw() { 
   image(bgImg, 0, y1, width, height);
   image(bgImg, 0, y2, width, height);
+  image(groundImg, 0, z-300, width, 300);
+
   lostLabel.style('display', 'none');
 
   if (newGame || lost) {
+    lostLabel.html(`SAY PLAY <br> TO PLAY`);
+    lostLabel.style('display', 'block');
+    
     scrollSpeed = 0;
     y1 -= scrollSpeed;
     y2 -= scrollSpeed;
-    
+    z -= scrollSpeed;
+
     if (y1 < -height){
       y1 = height;
     }
@@ -78,6 +112,7 @@ function draw() {
     }
 
     if (lost) {
+      lostLabel.html(`YOU LOST <br> SAY PLAY TO START OVER`);
       lostLabel.style('display', 'block');
     }
   } else {
@@ -91,6 +126,7 @@ function draw() {
       scrollSpeed = 10;
       y1 += scrollSpeed;
       y2 += scrollSpeed;
+      z += scrollSpeed;
       
       if (y1 > height){
         y1 = -height;
@@ -118,6 +154,9 @@ function draw() {
   }
 
   if (topScore - Math.floor(score/100) >= 8) {
+    if (!lost) {
+      results.push(Math.floor(score/100))
+    }
     lost = true;
     console.log("lost");
   }
@@ -128,12 +167,15 @@ function draw() {
 }
 
 function mouseClicked() {
-  newGame = false;
-  if (lost) {
-    results.push(Math.floor(score/100))
-    lost = false
-    score = 0;
-  }
+
+  // if (lost || newGame) {
+    // newGame = false;
+    // lost = false
+    // score = 0;
+    // y1 = 0;
+    // y2 = height;
+    // z = height;
+  // }
   isMouseClicked = true;
   setTimeout(() => {
     isMouseClicked = false;
@@ -141,7 +183,7 @@ function mouseClicked() {
 }
 
 function scoresOutput() {
-  var str = 'SCORES: <br> <br>';
+  var str = '&#x1f451; LEADERBOARD: &#x1f451; <br> <br>';
 
   for (var i = results.length-1; i >= 0; i--) {
     let index = i+1;
