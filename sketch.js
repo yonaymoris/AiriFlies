@@ -1,25 +1,38 @@
 const mySoundModelURl = 'https://storage.googleapis.com/tm-speech-commands/airilove/model.json';
 let mySoundModel;
 
+var myCanvas;
+
+// labels, images & sprites
 var bgImg;
 var groundImg;
 var lostLabel;
-var airi;
-var y1 = 0;
-var y2;
-var z;
-var myCanvas;
-var scoreLabel;
-var scoresLabel;
-var score = 0;
-var topScore;
-var level = 0;
+var rock;
 
+var airi;
 var airi_resting;
 var airi_developed;
 var airi_fly;
 
+var scoreLabel;
+var scoresLabel;
+
+// positions
+var y1 = 0;
+var y2;
+var z;
+
+// positions for the rock
+
+var y = [];
+var x = [-250, -150, -50];
+var x_initial = [-250, -150, -50];
+
+var score = 0;
+var topScore;
+var level = 0;
 var scrollSpeed = 1;
+
 var isMouseClicked = false;
 var newGame = true;
 var lost = false;
@@ -30,6 +43,7 @@ function preload(){
   mySoundModel = ml5.soundClassifier(mySoundModelURl);
   bgImg = loadImage("assets/bgr.png");
   groundImg = loadImage("assets/ground.png");
+  rock = loadImage("assets/rock.png");
 }
 
 function setup() { 
@@ -65,6 +79,10 @@ function setup() {
 
   y2 = height;
   z = height;
+
+  for (var i = 0; i < 3; i++) {
+    y.push(Math.floor(Math.random()*height-height));
+  }
 } 
 
 function gotResults(err, results) {
@@ -88,16 +106,25 @@ function gotResults(err, results) {
 }
 
 function draw() { 
+  var i;
+
   image(bgImg, 0, y1, width, height);
   image(bgImg, 0, y2, width, height);
   image(groundImg, 0, z-300, width, 300);
 
+  for (i = 0; i < 3; i++) {
+    image(rock, x[i], y[i], 64, 64);
+  }
+
   lostLabel.style('display', 'none');
 
   if (newGame || lost) {
-    lostLabel.html(`SAY PLAY <br> TO PLAY`);
+    // stay still if the game was lost or is new
+
+    // label for a new game
+    lostLabel.html(`SAY PLAY TO PLAY`);
     lostLabel.style('display', 'block');
-    
+
     scrollSpeed = 0;
     y1 -= scrollSpeed;
     y2 -= scrollSpeed;
@@ -112,21 +139,24 @@ function draw() {
     }
 
     if (lost) {
-      lostLabel.html(`YOU LOST <br> SAY PLAY TO START OVER`);
+      // use a different label is the game was lost
+      lostLabel.html(`YOU LOST SAY PLAY TO START OVER`);
       lostLabel.style('display', 'block');
     }
   } else {
     if(level == 1) {
       airi.changeAnimation('developed');
     }
-    // if (mouseIsPressed) {
-    // console.log('isMouseClicked: ', isMouseClicked)
 
     if (isMouseClicked) {
       scrollSpeed = 10;
       y1 += scrollSpeed;
       y2 += scrollSpeed;
       z += scrollSpeed;
+
+      for (i = 0; i < 3; i++) {
+        y[i] += scrollSpeed;
+      }
       
       if (y1 > height){
         y1 = -height;
@@ -139,9 +169,16 @@ function draw() {
       level = 1;
       topScore = Math.floor(score/100);
     } else {
+
+      // fall down if there is no action
       scrollSpeed = 1;
       y1 -= scrollSpeed;
       y2 -= scrollSpeed;
+      z -= scrollSpeed;
+
+      for (i = 0; i < 3; i++) {
+        y[i] -= scrollSpeed;
+      }
       
       if (y1 < -height){
         y1 = height;
@@ -153,7 +190,19 @@ function draw() {
     }
   }
 
-  if (topScore - Math.floor(score/100) >= 8) {
+  for (i = 0; i < 3; i++) {
+    if (x[i] >= width || y[i] >= height+200) {
+      x[i] = x_initial[i];
+      y[i] = Math.floor(Math.random()*height-height);
+    }
+  }
+
+  for (i = 0; i < 3; i++) {
+    x[i] += 3;
+  }
+
+  const ifLost = hitTheObject();
+  if (topScore - Math.floor(score/100) >= 8 || ifLost) {
     if (!lost) {
       results.push(Math.floor(score/100))
     }
@@ -161,35 +210,44 @@ function draw() {
     console.log("lost");
   }
 
+  // top score label
   scoreLabel.html(`Score: ${Math.floor(score/100)}`);
   scoresOutput();
   drawSprites(airi);
 }
 
 function mouseClicked() {
-
-  // if (lost || newGame) {
-    // newGame = false;
-    // lost = false
-    // score = 0;
-    // y1 = 0;
-    // y2 = height;
-    // z = height;
-  // }
   isMouseClicked = true;
   setTimeout(() => {
     isMouseClicked = false;
   }, 700);
 }
 
+function hitTheObject() {
+  for (var i = 0; i < 3; i++) {
+    if (x[i] > 260 && x[i] < 360 && y[i] < 450 && y[i] > 340) return true;
+  }
+
+  return false;
+}
+
 function scoresOutput() {
   var str = '&#x1f451; LEADERBOARD: &#x1f451; <br> <br>';
+  var index;
 
-  for (var i = results.length-1; i >= 0; i--) {
-    let index = i+1;
-    if (results[i] == Math.max(...results)) {
-      str += 'Human ' + index + ' &#x1f451;: ' + results[i] + '<br> <br>';
-    } else {
+  for (var j = 0; j < results.length; j++) {
+    if (results[j] == Math.max(...results)) {
+      index = j+1
+      str += 'Human ' + index + ' &#x1f451;: ' + results[j] + '<br> <br> <br>';
+    }
+  }
+
+  var limit = results.length;
+  if (results.length > 11) limit = 11;
+  for (var i = results.length-1; i >= results.length-limit; i--) {
+    index = i+1;
+
+    if (results[i] != Math.max(...results)) {
       str += 'Human ' + index + ': ' + results[i] + '<br> <br>';
     }
   }
