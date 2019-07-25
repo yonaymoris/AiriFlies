@@ -5,6 +5,7 @@ var myCanvas;
 
 // labels, images & sprites
 var bgImg;
+var bgImg1, bgImg2, bgImg3;
 var groundImg;
 var lostLabel;
 var rock;
@@ -25,8 +26,8 @@ var z;
 // positions for the rock
 
 var y = [];
-var x = [-250, -150, -50];
-var x_initial = [-250, -150, -50];
+var x = [-250, -200, -100, -50];
+var x_initial = [-250, -200, -100, -50];
 
 var score = 0;
 var topScore;
@@ -41,9 +42,11 @@ var results = [];
 
 function preload(){
   mySoundModel = ml5.soundClassifier(mySoundModelURl);
-  bgImg = loadImage("assets/bgr.png");
+  bgImg1 = loadImage("assets/bgr1.png");
+  bgImg2 = loadImage("assets/bgr2.png");
+  bgImg3 = loadImage("assets/bgr3.png");
   groundImg = loadImage("assets/ground.png");
-  rock = loadImage("assets/rock.png");
+  rock = loadImage("assets/ghost.png");
 }
 
 function setup() { 
@@ -80,7 +83,7 @@ function setup() {
   y2 = height;
   z = height;
 
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 4; i++) {
     y.push(Math.floor(Math.random()*height-height));
   }
 } 
@@ -108,12 +111,20 @@ function gotResults(err, results) {
 function draw() { 
   var i;
 
+  if (Math.floor(score/100) < 50) {
+    bgImg = bgImg1;
+  } else if (Math.floor(score/100) >= 50 && Math.floor(score/100) < 120) {
+    bgImg = bgImg2;
+  } else {
+    bgImg = bgImg3;
+  }
+
   image(bgImg, 0, y1, width, height);
   image(bgImg, 0, y2, width, height);
   image(groundImg, 0, z-300, width, 300);
 
-  for (i = 0; i < 3; i++) {
-    image(rock, x[i], y[i], 64, 64);
+  for (i = 0; i < 4; i++) {
+    image(rock, x[i], y[i], 90, 90);
   }
 
   lostLabel.style('display', 'none');
@@ -154,7 +165,7 @@ function draw() {
       y2 += scrollSpeed;
       z += scrollSpeed;
 
-      for (i = 0; i < 3; i++) {
+      for (i = 0; i < 4; i++) {
         y[i] += scrollSpeed;
       }
       
@@ -176,7 +187,7 @@ function draw() {
       y2 -= scrollSpeed;
       z -= scrollSpeed;
 
-      for (i = 0; i < 3; i++) {
+      for (i = 0; i < 4; i++) {
         y[i] -= scrollSpeed;
       }
       
@@ -190,14 +201,14 @@ function draw() {
     }
   }
 
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 4; i++) {
     if (x[i] >= width || y[i] >= height+200) {
       x[i] = x_initial[i];
       y[i] = Math.floor(Math.random()*height-height);
     }
   }
 
-  for (i = 0; i < 3; i++) {
+  for (i = 0; i < 4; i++) {
     x[i] += 3;
   }
 
@@ -224,7 +235,7 @@ function mouseClicked() {
 }
 
 function hitTheObject() {
-  for (var i = 0; i < 3; i++) {
+  for (var i = 0; i < 4; i++) {
     if (x[i] > 260 && x[i] < 360 && y[i] < 450 && y[i] > 340) return true;
   }
 
