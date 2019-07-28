@@ -1,4 +1,5 @@
-const mySoundModelURl = 'https://storage.googleapis.com/tm-speech-commands/airilove/model.json';
+// const mySoundModelURl = 'https://storage.googleapis.com/tm-speech-commands/airilove/model.json';
+const mySoundModelURl = 'https://storage.googleapis.com/tm-speech-commands/airifliesv2/model.json';
 let mySoundModel;
 
 var myCanvas;
