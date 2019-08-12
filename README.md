@@ -18,8 +18,8 @@ The sound-classification model was trained using teachable machine 2 on 120 samp
 
 The main character of the game is a fluffy flying ball named Airi. The name was created by combining two words ai and tori from Japanese, which mean love and bird respectively. The love bird does not stand for love for someone else but rather love for yourself. Airi can also develop the higher she flies and overcomes obstacles.
 
-![airi 1](http://localhost:8000/img/airi/Airi%20resting.gif "airi 1")
-![airi 2](http://localhost:8000/img/airi/Airi%20woke%20up.gif "airi 2")
-![airi 3](http://localhost:8000/img/airi/Airi%20developed.gif "airi 3")
-![airi 4](http://localhost:8000/img/airi/Airi%20fly.gif "airi 4")
-![ghost](http://localhost:8000/img/airi/Ghost.gif "ghost")
+![airi 1](https://www.yonaymoris.me/img/airi/Airi%20resting.gif "airi 1")
+![airi 2](https://www.yonaymoris.me/img/airi/Airi%20woke%20up.gif "airi 2")
+![airi 3](https://www.yonaymoris.me/img/airi/Airi%20developed.gif "airi 3")
+![airi 4](https://www.yonaymoris.me/img/airi/Airi%20fly.gif "airi 4")
+![ghost](https://www.yonaymoris.me/img/airi/Ghost.gif "ghost")
